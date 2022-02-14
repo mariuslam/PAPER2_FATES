@@ -634,8 +634,8 @@ contains
     ! !LOCAL VARIABLES:
     type (ed_cohort_type)   , pointer             :: currentCohort
     !----------------------------------------------------------------------
-
     currentCohort => cc_p
+
     currentCohort%NV                 = 0    
     currentCohort%status_coh         = 0    
     currentCohort%rdark              = 0._r8
@@ -653,8 +653,7 @@ contains
     currentcohort%gpp_tstep          = 0._r8
     currentcohort%resp_tstep         = 0._r8
     currentcohort%resp_acc_hold      = 0._r8
-    currentCohort%hard_level         = 0._r8 
-    
+    currentCohort%hard_level         = 0._r8
     currentcohort%year_net_uptake(:) = 999._r8 ! this needs to be 999, or trimming of new cohorts will break.
     currentcohort%ts_net_uptake(:)   = 0._r8
     currentcohort%fraction_crown_burned = 0._r8
@@ -1885,7 +1884,7 @@ contains
     n%cambial_mort          = o%cambial_mort
 
     ! Plant Hydraulics
-    
+
     if( hlm_use_planthydro.eq.itrue ) then
       call CopyCohortHydraulics(n,o)
     endif

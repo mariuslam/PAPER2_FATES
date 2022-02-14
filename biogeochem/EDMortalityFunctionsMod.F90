@@ -30,8 +30,7 @@ module EDMortalityFunctionsMod
    use FatesInterfaceTypesMod     , only : hlm_current_day
    implicit none
    private
-   
-   
+
    public :: mortality_rates
    public :: Mortality_Derivative
    public :: Hardening_scheme
@@ -85,7 +84,7 @@ contains
     real(r8) :: flc                ! fractional loss of conductivity 
     real(r8) :: max_h                      !maximum hardiness level
     real(r8), parameter :: min_h = -2.0_r8 !minimum hardiness level
-    real(r8) :: Tmin  !marius
+    real(r8) :: Tmin
     real(r8), parameter :: frost_mort_buffer = 5.0_r8  ! 5deg buffer for freezing mortality
     logical, parameter :: test_zero_mortality = .false. ! Developer test which
                                                         ! may help to debug carbon imbalances
@@ -142,7 +141,8 @@ if (hlm_use_ed_prescribed_phys .eq. ifalse) then
      min_fmc = min(min_fmc, min_fmc_ar)
      flc = 1.0_r8-min_fmc
      if(flc >= hf_flc_threshold .and. hf_flc_threshold < 1.0_r8 )then 
-       hmort = (flc-hf_flc_threshold)/(1.0_r8-hf_flc_threshold) * EDPftvarcon_inst%mort_scalar_hydrfailure(cohort_in%pft)
+       hmort = (flc-hf_flc_threshold)/(1.0_r8-hf_flc_threshold) * &
+           EDPftvarcon_inst%mort_scalar_hydrfailure(cohort_in%pft)
      else
        hmort = 0.0_r8
      endif      
@@ -403,8 +403,3 @@ if (hlm_use_ed_prescribed_phys .eq. ifalse) then
   end subroutine Hardening_scheme
 
 end module EDMortalityFunctionsMod
-
-
-
-
-
