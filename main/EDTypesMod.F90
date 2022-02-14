@@ -360,10 +360,9 @@ module EDTypesMod
                                                          ! (i.e. they are moved to newly-anthro-disturbed secondary 
                                                          !  forest patch).  fraction /per logging activity
 
-     real(r8) ::  seed_prod                              ! diagnostic seed production rate [kgC/plant/day]
+     real(r8) :: seed_prod                              ! diagnostic seed production rate [kgC/plant/day]
 
-     real(r8) ::  hard_level                             ! Hardiness state (K) (marius)
-     real(r8) ::  hard_level_prev                        ! Hardiness state (K) (marius)
+     real(r8) :: hard_level                             ! Hardiness state (K) (marius)
 
      ! NITROGEN POOLS      
      ! ----------------------------------------------------------------------------------
@@ -742,10 +741,9 @@ module EDTypesMod
      real(r8) ::  acc_ni                                       ! daily nesterov index accumulating over time.
      real(r8) ::  fdi                                          ! daily probability an ignition event will start a fire
      real(r8) ::  NF                                           ! daily ignitions in km2
-     real(r8) ::  gdd5                                         ! marius
-     real(r8) ::  hardtemp                                         ! marius
-     real(r8) ::  Tmin_24_fates
-     real(r8) ::  hard_level2(1:maxpft)                                         ! marius
+     real(r8) ::  hardtemp                                     ! Temperature index to calculate max hardiness level
+     real(r8) ::  Tmin_24_fates                                ! Minimum daily temperature
+     real(r8) ::  hard_level2(1:maxpft)                        ! Site hardiness level
      real(r8) ::  NF_successful                                ! daily ignitions in km2 that actually lead to fire
 
      ! PLANT HYDRAULICS
@@ -1090,8 +1088,7 @@ module EDTypesMod
      write(fates_log(),*) 'co%hmort                  = ', ccohort%hmort
      write(fates_log(),*) 'co%frmort                 = ', ccohort%frmort
      write(fates_log(),*) 'co%asmort                 = ', ccohort%asmort
-     write(fates_log(),*) 'co%hard_level             = ', ccohort%hard_level !marius
-     write(fates_log(),*) 'co%hard_level_prev        = ', ccohort%hard_level_prev !marius
+     write(fates_log(),*) 'co%hard_level             = ', ccohort%hard_level
      write(fates_log(),*) 'co%isnew                  = ', ccohort%isnew
      write(fates_log(),*) 'co%dndt                   = ', ccohort%dndt
      write(fates_log(),*) 'co%dhdt                   = ', ccohort%dhdt

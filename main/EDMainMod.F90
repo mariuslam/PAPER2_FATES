@@ -25,9 +25,8 @@ module EDMainMod
   use FatesInterfaceTypesMod        , only : bc_out_type
   use FatesInterfaceTypesMod        , only : hlm_masterproc
   use FatesInterfaceTypesMod        , only : numpft
-  use FatesInterfaceTypesMod        , only : hlm_use_hydrohard !marius
-  use FatesInterfaceTypesMod        , only : hlm_use_frosthard !marius
-  use FatesInterfaceTypesMod        , only : hlm_model_day !marius
+  use FatesInterfaceTypesMod        , only : hlm_use_frosthard 
+  use FatesInterfaceTypesMod        , only : hlm_model_day
   use FatesHydroWTFMod              , only : wrf_type, wrf_type_tfs
   use FatesInterfaceTypesMod        , only : hlm_use_nocomp
   use PRTGenericMod            , only : prt_carbon_allom_hyp
@@ -88,7 +87,7 @@ module EDMainMod
   use ChecksBalancesMod        , only : SiteMassStock
   use EDMortalityFunctionsMod  , only : Mortality_Derivative
   use EDTypesMod               , only : AREA_INV
-  use EDMortalityFunctionsMod  , only : Hardening_scheme !Marius
+  use EDMortalityFunctionsMod  , only : Hardening_scheme
 
   use PRTGenericMod,          only : carbon12_element
   use PRTGenericMod,          only : all_carbon_elements
@@ -311,20 +310,19 @@ contains
     ! !USES:
     use FatesInterfaceTypesMod, only : hlm_use_cohort_age_tracking
     use FatesConstantsMod, only : itrue
-    use EDTypesMod          , only : maxpft !marius
+    use EDTypesMod          , only : maxpft 
     ! !ARGUMENTS:
     type(ed_site_type)     , intent(inout) :: currentSite
     type(bc_in_type)        , intent(in)   :: bc_in
     type(bc_out_type)       , intent(inout)  :: bc_out
-    class(wrf_type_tfs), pointer :: wrf_tfs !marius
     !
     ! !LOCAL VARIABLES:
     type(site_massbal_type), pointer :: site_cmass
     type(ed_patch_type)  , pointer :: currentPatch
     type(ed_cohort_type) , pointer :: currentCohort
 
-    real(r8) :: ncohort_pft(maxpft)   !marius
-    real(r8) :: number_fraction_pft !marius
+    real(r8) :: ncohort_pft(maxpft)   
+    real(r8) :: number_fraction_pft 
     integer  :: c                     ! Counter for litter size class
     integer  :: ft                    ! Counter for PFT
     integer  :: io_si                 ! global site index for history writing
@@ -340,8 +338,8 @@ contains
     real(r8) :: current_npp           ! place holder for calculating npp each year in prescribed physiology mode
     real(r8) :: frac_site_primary
 
-    !-----------------------------------------------------------------------
-    if (hlm_use_hydrohard.eq.itrue .or. hlm_use_frosthard.eq.itrue) then
+
+    if (hlm_use_frosthard.eq.itrue) then ! definition of T5 using the minimum temperature, will be used later to define the maximum hardiness level
        currentSite%Tmin_24_fates=bc_in%tmin24_si-273.15_r8
        if (nint(hlm_model_day)>=366) then
          write(fates_log(),*) '5yrmean was taken'
@@ -350,27 +348,6 @@ contains
          write(fates_log(),*) 'minyrinst was taken'
          currentSite%hardtemp=bc_in%t_min_yr_inst_si-273.15_r8
        end if   
-       !ncohort_pft(:) = 0.0_r8 
-       ! Normalization counters
-       !currentPatch => currentSite%youngest_patch
-       !do while(associated(currentPatch))
-       !   currentCohort => currentPatch%shortest
-       !   do while(associated(currentCohort)) 
-       !      if ( (.not. currentCohort%isnew) .or. currentCohort%hard_level>-1.0_r8) then
-       !         ft = currentCohort%pft
-       !         currentCohort%hard_level=currentSite%hard_level2(ft)
-       !         ncohort_pft(ft) = ncohort_pft(ft) + currentCohort%n
-       !      end if
-       !      currentCohort => currentCohort%taller
-       !   enddo ! cohort loop
-       !   currentPatch => currentPatch%older
-       !end do !patch loop
-       !write(fates_log(),*) hlm_current_year,hlm_day_of_year,'hard_level2 first',currentSite%hard_level2(ft)
-       !do ft = 1, numpft
-       !   if (ncohort_pft(ft)>0._r8)then
-       !      currentSite%hard_level2(ft)=0._r8
-       !   endif
-       !enddo
 
        currentPatch => currentSite%youngest_patch
        do while(associated(currentPatch))
@@ -378,12 +355,8 @@ contains
           do while(associated(currentCohort)) 
              if ( (.not. currentCohort%isnew) .or. currentCohort%hard_level>-1.0_r8 ) then
                 ft = currentCohort%pft
-                !write(fates_log(),*) hlm_current_year,hlm_day_of_year,'hard_level first',currentCohort%hard_level
-                call Hardening_scheme( currentSite, currentPatch, currentCohort, bc_in ) !hard_level and hard_GRF will be updated, ED_ecosystem_dynamics is called once a day at beginning of day Marius
-                !write(fates_log(),*) hlm_current_year,hlm_day_of_year,'hard_level second',currentCohort%hard_level
-                !number_fraction_pft = (currentCohort%n / ncohort_pft(ft))                      !marius
-                !currentSite%hard_level2(ft) = currentSite%hard_level2(ft) + currentCohort%hard_level * number_fraction_pft   
-                currentSite%hard_level2(ft) = currentCohort%hard_level 
+                call Hardening_scheme( currentSite, currentPatch, currentCohort, bc_in ) ! calculate cohort level hardiness, only oldest patch and tallest cohort is needed ultimately
+                currentSite%hard_level2(ft) = currentCohort%hard_level ! the site level hardiness is equal to the oldest/tallest cohort, because hardiness level depends on previous hardiness level
              endif
              currentCohort => currentCohort%taller
           enddo ! cohort loop
@@ -395,15 +368,13 @@ contains
           currentCohort => currentPatch%shortest
           do while(associated(currentCohort)) 
              ft = currentCohort%pft
-             currentCohort%hard_level = currentSite%hard_level2(ft)   
+             currentCohort%hard_level = currentSite%hard_level2(ft)  ! each cohort is given the same hardiness level from the site variable
              currentCohort => currentCohort%taller
           enddo ! cohort loop
           currentPatch => currentPatch%older
        end do !patch loop
-       !write(fates_log(),*) hlm_current_year,hlm_day_of_year,'hard_level2 second',currentSite%hard_level2(ft)
 
     end if
-    !---------------
 
     call get_frac_site_primary(currentSite, frac_site_primary)
 
@@ -433,10 +404,10 @@ contains
        currentCohort => currentPatch%shortest
        do while(associated(currentCohort))
 
+
           ft = currentCohort%pft
 
           ! Calculate the mortality derivatives
-
           call Mortality_Derivative( currentSite, currentCohort, bc_in, frac_site_primary )
 
           ! -----------------------------------------------------------------------------

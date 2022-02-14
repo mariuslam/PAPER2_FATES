@@ -39,8 +39,7 @@ module FatesRestartInterfaceMod
   use EDTypesMod,              only : nfsc
   use PRTGenericMod,           only : prt_global
   use PRTGenericMod,           only : num_elements
-  use FatesInterfaceTypesMod  , only : hlm_use_hydrohard !marius
-  use FatesInterfaceTypesMod  , only : hlm_use_frosthard !marius
+  use FatesInterfaceTypesMod  , only : hlm_use_frosthard
 
 
   ! CIME GLOBALS
@@ -90,9 +89,7 @@ module FatesRestartInterfaceMod
   integer :: ir_dleafoffdate_si
   integer :: ir_acc_ni_si
   integer :: ir_gdd_si
-  integer :: ir_gdd5_si !marius
-  integer :: ir_hard_level_co !marius
-  integer :: ir_hard_level_prev_co !marius
+  integer :: ir_hard_level_co
   integer :: ir_snow_depth_si
   integer :: ir_trunk_product_si
   integer :: ir_ncohort_pa
@@ -636,10 +633,6 @@ contains
     call this%set_restart_var(vname='fates_gdd_site', vtype=site_r8, &
          long_name='growing degree days at each site', units='degC days', flushval = flushzero, &
          hlms='CLM:ALM', initialize=initialize_variables, ivar=ivar, index = ir_gdd_si )
-    !marius
-    call this%set_restart_var(vname='fates_gdd5_site', vtype=site_r8, & 
-         long_name='growing degree days at each site', units='degC days', flushval = flushzero, &
-         hlms='CLM:ALM', initialize=initialize_variables, ivar=ivar, index = ir_gdd5_si )
 
     call this%set_restart_var(vname='fates_snow_depth_site', vtype=site_r8, &
          long_name='average snow depth', units='m', flushval = flushzero, &
@@ -676,13 +669,10 @@ contains
     ! 1D cohort Variables
     ! -----------------------------------------------------------------------------------
 
-    if  (hlm_use_hydrohard .eq. itrue .or. hlm_use_frosthard .eq. itrue) then !marius
+    if  (hlm_use_frosthard .eq. itrue) then
        call this%set_restart_var(vname='fates_hard_level', vtype=cohort_r8, &
             long_name='hard_level', units='DegC', flushval = flushinvalid, &
             hlms='CLM:ALM', initialize=initialize_variables, ivar=ivar, index = ir_hard_level_co )
-       call this%set_restart_var(vname='fates_hard_level_prev', vtype=cohort_r8, &
-            long_name='hard_level', units='DegC', flushval = flushinvalid, &
-            hlms='CLM:ALM', initialize=initialize_variables, ivar=ivar, index = ir_hard_level_prev_co )
     end if
     
     call this%set_restart_var(vname='fates_seed_prod', vtype=cohort_r8, &
@@ -1666,9 +1656,7 @@ contains
            rio_dleafoffdate_si         => this%rvars(ir_dleafoffdate_si)%int1d, &
            rio_acc_ni_si               => this%rvars(ir_acc_ni_si)%r81d, &
            rio_gdd_si                  => this%rvars(ir_gdd_si)%r81d, &
-           rio_gdd5_si                  => this%rvars(ir_gdd5_si)%r81d, & !marius
-           rio_hard_level_co            => this%rvars(ir_hard_level_co)%r81d, & !marius
-           rio_hard_level_prev_co            => this%rvars(ir_hard_level_prev_co)%r81d, & !marius
+           rio_hard_level_co            => this%rvars(ir_hard_level_co)%r81d, &
            rio_snow_depth_si           => this%rvars(ir_snow_depth_si)%r81d, &
            rio_trunk_product_si        => this%rvars(ir_trunk_product_si)%r81d, &
            rio_ncohort_pa              => this%rvars(ir_ncohort_pa)%int1d, &
@@ -2144,7 +2132,6 @@ contains
           rio_dleafoffdate_si(io_idx_si) = sites(s)%dleafoffdate
           rio_acc_ni_si(io_idx_si)       = sites(s)%acc_NI
           rio_gdd_si(io_idx_si)          = sites(s)%grow_deg_days
-          rio_gdd5_si(io_idx_si)          = sites(s)%gdd5  !marius
           rio_snow_depth_si(io_idx_si)   = sites(s)%snow_depth
           ! Accumulated trunk product
           rio_trunk_product_si(io_idx_si) = sites(s)%resources_management%trunk_product_site
@@ -2484,9 +2471,7 @@ contains
           rio_dleafoffdate_si         => this%rvars(ir_dleafoffdate_si)%int1d, &
           rio_acc_ni_si               => this%rvars(ir_acc_ni_si)%r81d, &
           rio_gdd_si                  => this%rvars(ir_gdd_si)%r81d, &
-          rio_gdd5_si                  => this%rvars(ir_gdd5_si)%r81d, & !marius
-          rio_hard_level_co            => this%rvars(ir_hard_level_co)%r81d, & !marius
-          rio_hard_level_prev_co            => this%rvars(ir_hard_level_prev_co)%r81d, & !marius
+          rio_hard_level_co           => this%rvars(ir_hard_level_co)%r81d, &
           rio_snow_depth_si           => this%rvars(ir_snow_depth_si)%r81d, &
           rio_trunk_product_si        => this%rvars(ir_trunk_product_si)%r81d, &
           rio_ncohort_pa              => this%rvars(ir_ncohort_pa)%int1d, &
@@ -2715,9 +2700,8 @@ contains
                 ccohort%npp_acc_hold = rio_npp_acc_hold_co(io_idx_co)
                 ccohort%resp_m_def   = rio_resp_m_def_co(io_idx_co)
                 
-                if (hlm_use_hydrohard .eq. itrue .or. hlm_use_frosthard .eq. itrue) then
+                if (hlm_use_frosthard .eq. itrue) then
                    ccohort%hard_level   = rio_hard_level_co(io_idx_co) !marius
-                   ccohort%hard_level_prev   = rio_hard_level_prev_co(io_idx_co)
                 end if
 
                 ccohort%bmort        = rio_bmort_co(io_idx_co)
@@ -2997,7 +2981,6 @@ contains
           sites(s)%dleafoffdate   = rio_dleafoffdate_si(io_idx_si)
           sites(s)%acc_NI         = rio_acc_ni_si(io_idx_si)
           sites(s)%grow_deg_days  = rio_gdd_si(io_idx_si)
-          sites(s)%gdd5  = rio_gdd5_si(io_idx_si) !marius
           sites(s)%snow_depth     = rio_snow_depth_si(io_idx_si)
 
           sites(s)%resources_management%trunk_product_site = rio_trunk_product_si(io_idx_si)

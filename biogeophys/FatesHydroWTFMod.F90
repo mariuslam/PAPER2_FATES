@@ -13,7 +13,7 @@ module FatesHydroWTFMod
   use FatesGlobals     , only : endrun => fates_endrun
   use FatesGlobals     , only : fates_log
   use shr_log_mod      , only : errMsg => shr_log_errMsg
-  
+
   implicit none
   private
 
@@ -64,15 +64,15 @@ module FatesHydroWTFMod
       real(r8) :: dpsidth_min ! dpsi_dth where we start min interp
       real(r8) :: th_min      ! vwc matching min_sf_interp where we start linear interp
       real(r8) :: th_max      ! vwc matching max_sf_interp where we start linear interp
+
   contains
 
      procedure :: th_from_psi     => th_from_psi_base
      procedure :: psi_from_th     => psi_from_th_base
      procedure :: dpsidth_from_th => dpsidth_from_th_base
      procedure :: set_wrf_param   => set_wrf_param_base
-     procedure :: set_wrf_hard    => set_wrf_hard_base!marius
      procedure :: get_thsat       => get_thsat_base
-    
+
      ! All brands of WRFs have access to these tools to operate
      ! above and below sat and residual, should they want to
      procedure, non_overridable :: psi_linear_sat
@@ -179,7 +179,7 @@ module FatesHydroWTFMod
      real(r8) :: cap_corr ! correction for nonzero psi0x
      real(r8) :: cap_int  ! intercept of capillary region of curve
      real(r8) :: cap_slp  ! slope of capillary region of curve
-     integer  :: pmedia   ! self describing porous media index 
+     integer  :: pmedia   ! self describing porous media index
    contains
      procedure :: th_from_psi     => th_from_psi_tfs
      procedure :: psi_from_th     => psi_from_th_tfs
@@ -187,7 +187,7 @@ module FatesHydroWTFMod
      procedure :: set_wrf_param   => set_wrf_param_tfs
      procedure :: get_thsat       => get_thsat_tfs
      procedure :: bisect_pv
-     procedure :: set_wrf_hard  => set_wrf_cohort_hardening !marius
+     
   end type wrf_type_tfs
 
   ! Water Conductivity Function
@@ -294,14 +294,6 @@ contains
 
   ! ===========================================================================
 
-  subroutine set_wrf_hard_base(this,params_in) !marius
-    class(wrf_type)     :: this
-    real(r8),intent(in) :: params_in(:)
-    write(fates_log(),*) 'The base water retention function'
-    write(fates_log(),*) 'should never be actualized'
-    write(fates_log(),*) 'check how the class pointer was setup'
-    call endrun(msg=errMsg(sourcefile, __LINE__))
-  end subroutine set_wrf_hard_base  
   subroutine set_wrf_param_base(this,params_in)
     class(wrf_type)     :: this
     real(r8),intent(in) :: params_in(:)
@@ -377,7 +369,7 @@ contains
     write(fates_log(),*) 'check how the class pointer was setup'
     call endrun(msg=errMsg(sourcefile, __LINE__))
   end function dftcdpsi_from_psi_base
-  
+
   ! =====================================================================================
   ! Van Genuchten Functions are defined here
   ! =====================================================================================
@@ -696,7 +688,6 @@ contains
 
   ! =====================================================================================
 
-  
   function th_from_psi_cch(this,psi) result(th)
 
     class(wrf_type_cch)  :: this
@@ -708,12 +699,12 @@ contains
     if(psi>this%psi_max) then
         ! Linear range for extreme values
         th = this%th_max + (psi-this%psi_max)/this%dpsidth_max
-    else if (psi<-20._r8)   then      ! marius
+    else if (psi<-20._r8)   then
         th = thmin + thmin/5._r8*(psi+20._r8)
     else
         th = this%th_sat*(psi/this%psi_sat)**(-1.0_r8/this%beta)
     end if
-    
+
     return
   end function th_from_psi_cch
 
@@ -728,9 +719,9 @@ contains
     thmin=this%th_sat*(-20._r8/this%psi_sat)**(-1.0_r8/this%beta)
     if(th>this%th_max) then
         psi = this%psi_max + this%dpsidth_max*(th-max_sf_interp*this%th_sat)
-    else if (th < thmin)   then      ! marius
+    else if (th < thmin)   then
         psi = -20._r8 - 5._r8 * (thmin-th)/thmin
-        !write(fates_log(),*)'check1','psi',psi,'th',th,'thmin',thmin
+
     else
         psi = this%psi_sat*(th/this%th_sat)**(-this%beta)
     end if
@@ -749,7 +740,7 @@ contains
     ! Differentiate:
     if(th>this%th_max) then
         dpsidth = this%dpsidth_max
-    else if (th < thmin )   then      ! marius
+    else if (th < thmin )   then
         dpsidth = 5._r8/thmin
     else
         dpsidth = -this%beta*this%psi_sat/this%th_sat * (th/this%th_sat)**(-this%beta-1._r8)
@@ -838,20 +829,6 @@ contains
 
     return
   end subroutine set_wrf_param_tfs
-  ! =====================================================================================
-  ! Set the hardening changed variables in wrf !marius
-
-  subroutine set_wrf_cohort_hardening(this,params_in)
-
-    class(wrf_type_tfs) :: this
-    real(r8), intent(in) :: params_in(:)
-
-    this%pinot    = params_in(1)
-    this%epsil    = params_in(2)
-
-    return
-  end subroutine set_wrf_cohort_hardening
-  ! =====================================================================================
 
   function get_thsat_tfs(this) result(th_sat)
       class(wrf_type_tfs)   :: this
@@ -911,7 +888,7 @@ contains
 
   ! =====================================================================================
 
-  function psi_from_th_tfs(this,th) result(psi) !marius
+  function psi_from_th_tfs(this,th) result(psi)
 
     class(wrf_type_tfs)  :: this
     real(r8),intent(in)  :: th
@@ -946,7 +923,7 @@ contains
        ! the elastic and capilary, and then smooth their
        ! combined with the caviation
 
-       call solutepsi(th_corr,this%rwc_ft,this%th_sat,this%th_res,this%pinot,psi_sol) 
+       call solutepsi(th_corr,this%rwc_ft,this%th_sat,this%th_res,this%pinot,psi_sol)
        call pressurepsi(th_corr,this%rwc_ft,this%th_sat,this%th_res,this%pinot,this%epsil,psi_press)
 
        psi_elastic = psi_sol + psi_press
@@ -1153,7 +1130,7 @@ contains
     !     = pino * (rwc_ft - th_res/th_sat)/(th/th_sat - th_res/th_sat )
     !     = pino * (th_sat*rwc_ft - th_res)/(th - th_res)
     ! -----------------------------------------------------------------------------------
-    
+
     psi = pinot * (th_sat*rwc_ft - th_res) / (th - th_res)
 
     return

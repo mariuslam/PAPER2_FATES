@@ -146,13 +146,9 @@ module FatesInterfaceTypesMod
                                                        ! plant hydraulics (bchristo/xu methods)
                                                        ! 1 = TRUE, 0 = FALSE
                                                        ! THIS IS CURRENTLY NOT SUPPORTED 
-                                                       
-   integer, public :: hlm_use_hydrohard    ! This flag signals whether or not to use Marius
-                                                       ! plant hydraulics (bchristo/xu methods)
-                                                       ! 1 = TRUE, 0 = FALSE
-                                                       ! THIS IS CURRENTLY NOT SUPPORTED 
-   integer, public :: hlm_use_frosthard    ! This flag signals whether or not to use Marius
-                                                       ! plant hydraulics (bchristo/xu methods)
+
+   integer, public :: hlm_use_frosthard    ! This flag signals whether or not to use 
+                                                       ! Rammig frost model
                                                        ! 1 = TRUE, 0 = FALSE
                                                        ! THIS IS CURRENTLY NOT SUPPORTED 
 
@@ -479,7 +475,7 @@ module FatesInterfaceTypesMod
       real(r8) :: snow_depth_si    ! Depth of snow in snowy areas of site (m)
       real(r8) :: frac_sno_eff_si  ! Fraction of ground covered by snow (0-1)
       
-      real(r8)             :: temp24_si       !marius
+      real(r8)             :: temp24_si
       real(r8)             :: t_mean_5yr_si  
       real(r8)             :: t_min_yr_inst_si  
       real(r8)             :: tmin24_si 
