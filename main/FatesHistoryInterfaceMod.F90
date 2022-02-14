@@ -4349,7 +4349,7 @@ end subroutine update_history_hifrq
 
     call this%set_history_var(vname='PFThardiness2',  units='gC/m2',            &
          long='hardiness level2', use_default='active',              &
-         avgflag='A', vtype=site_pft_r8, hlms='CLM:ALM', flushval=0.0_r8, upfreq=1, &
+         avgflag='A', vtype=site_pft_r8, hlms='CLM:ALM', flushval=hlm_hio_ignore_val, upfreq=1, &
          ivar=ivar, initialize=initialize_variables, index = ih_hard_level2_si_pft )
 
     call this%set_history_var(vname='PFThardiness',  units='degC',            &

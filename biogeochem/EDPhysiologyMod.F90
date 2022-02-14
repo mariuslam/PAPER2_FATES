@@ -1117,7 +1117,7 @@ contains
 
           if (prt_params%season_decid(ipft) == itrue)then
              if ( currentSite%cstatus == phen_cstat_notcold  )then                ! we have just moved to leaves being on .
-              if ( currentSite%hard_level2(ipft) > -3._r8 )then ! we have just moved to leaves being on . marius
+              !if ( currentSite%hard_level2(ipft) > -3._r8 )then ! we have just moved to leaves being on . marius
                 if (currentCohort%status_coh == leaves_off)then ! Are the leaves currently off?
                    currentCohort%status_coh = leaves_on         ! Leaves are on, so change status to
                    ! stop flow of carbon out of bstore.
@@ -1173,7 +1173,7 @@ contains
 
                    endif
                 endif !pft phenology
-              endif
+              !endif marius
              endif ! growing season
 
              !COLD LEAF OFF

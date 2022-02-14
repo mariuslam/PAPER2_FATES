@@ -517,6 +517,8 @@ contains
     nullify(currentCohort%patchptr)
 
     ! VEGETATION STRUCTURE
+    currentCohort%hard_level         = nan !marius
+    currentCohort%hard_level_prev    = nan !marius
     currentCohort%pft                = fates_unset_int  ! pft number
     currentCohort%indexnumber        = fates_unset_int  ! unique number for each cohort. (within clump?)
     currentCohort%canopy_layer       = fates_unset_int  ! canopy status of cohort (1 = canopy, 2 = understorey, etc.)
@@ -636,8 +638,8 @@ contains
     !----------------------------------------------------------------------
 
     currentCohort => cc_p
-    currentCohort%hard_level         = -2._r8 !marius
-    currentCohort%hard_level_prev    = -2._r8 !marius
+    currentCohort%hard_level         = 0._r8 !marius
+    currentCohort%hard_level_prev    = 0._r8 !marius
     currentCohort%NV                 = 0    
     currentCohort%status_coh         = 0    
     currentCohort%rdark              = 0._r8
@@ -1366,8 +1368,8 @@ contains
                                    ! their initization values, which should be the same for each
 
                                    if ( .not.currentCohort%isnew) then
-				      currentCohort%hard_level = (currentCohort%n*currentCohort%hard_level + nextc%n*nextc%hard_level)/newn !marius
-				      currentCohort%hard_level_prev = (currentCohort%n*currentCohort%hard_level_prev + nextc%n*nextc%hard_level_prev)/newn !marius
+				      !currentCohort%hard_level = (currentCohort%n*currentCohort%hard_level + nextc%n*nextc%hard_level)/newn !marius
+				      !currentCohort%hard_level_prev = (currentCohort%n*currentCohort%hard_level_prev + nextc%n*nextc%hard_level_prev)/newn !marius
                                       currentCohort%seed_prod      = (currentCohort%n*currentCohort%seed_prod + &
                                            nextc%n*nextc%seed_prod)/newn
                                       currentCohort%gpp_acc        = (currentCohort%n*currentCohort%gpp_acc     + &

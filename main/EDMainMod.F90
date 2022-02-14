@@ -350,46 +350,58 @@ contains
          write(fates_log(),*) 'minyrinst was taken'
          currentSite%hardtemp=bc_in%t_min_yr_inst_si-273.15_r8
        end if   
-       ncohort_pft(:) = 0.0_r8 
+       !ncohort_pft(:) = 0.0_r8 
        ! Normalization counters
+       !currentPatch => currentSite%youngest_patch
+       !do while(associated(currentPatch))
+       !   currentCohort => currentPatch%shortest
+       !   do while(associated(currentCohort)) 
+       !      if ( (.not. currentCohort%isnew) .or. currentCohort%hard_level>-1.0_r8) then
+       !         ft = currentCohort%pft
+       !         currentCohort%hard_level=currentSite%hard_level2(ft)
+       !         ncohort_pft(ft) = ncohort_pft(ft) + currentCohort%n
+       !      end if
+       !      currentCohort => currentCohort%taller
+       !   enddo ! cohort loop
+       !   currentPatch => currentPatch%older
+       !end do !patch loop
+       !write(fates_log(),*) hlm_current_year,hlm_day_of_year,'hard_level2 first',currentSite%hard_level2(ft)
+       !do ft = 1, numpft
+       !   if (ncohort_pft(ft)>0._r8)then
+       !      currentSite%hard_level2(ft)=0._r8
+       !   endif
+       !enddo
+
        currentPatch => currentSite%youngest_patch
        do while(associated(currentPatch))
           currentCohort => currentPatch%shortest
           do while(associated(currentCohort)) 
-             ft = currentCohort%pft
-             ncohort_pft(ft) = ncohort_pft(ft) + currentCohort%n
+             if ( (.not. currentCohort%isnew) .or. currentCohort%hard_level>-1.0_r8 ) then
+                ft = currentCohort%pft
+                !write(fates_log(),*) hlm_current_year,hlm_day_of_year,'hard_level first',currentCohort%hard_level
+                call Hardening_scheme( currentSite, currentPatch, currentCohort, bc_in ) !hard_level and hard_GRF will be updated, ED_ecosystem_dynamics is called once a day at beginning of day Marius
+                !write(fates_log(),*) hlm_current_year,hlm_day_of_year,'hard_level second',currentCohort%hard_level
+                !number_fraction_pft = (currentCohort%n / ncohort_pft(ft))                      !marius
+                !currentSite%hard_level2(ft) = currentSite%hard_level2(ft) + currentCohort%hard_level * number_fraction_pft   
+                currentSite%hard_level2(ft) = currentCohort%hard_level 
+             endif
              currentCohort => currentCohort%taller
           enddo ! cohort loop
           currentPatch => currentPatch%older
        end do !patch loop
-       do ft = 1, numpft
-          if (ncohort_pft(ft)>0._r8)then
-             currentSite%hard_level2(ft)=0._r8
-          endif
-       enddo
+
        currentPatch => currentSite%youngest_patch
-       do while(associated(currentPatch))
-          currentCohort => currentPatch%shortest
-          do while(associated(currentCohort)) 
-             ft = currentCohort%pft
-             call Hardening_scheme( currentSite, currentPatch, currentCohort, bc_in ) !hard_level and hard_GRF will be updated, ED_ecosystem_dynamics is called once a day at beginning of day Marius
-             number_fraction_pft = (currentCohort%n / ncohort_pft(ft))                      !marius
-             currentSite%hard_level2(ft) = currentSite%hard_level2(ft) + currentCohort%hard_level * number_fraction_pft   
-             write(fates_log(),*) 'hard_level2',currentSite%hard_level2(ft)     
-             currentCohort => currentCohort%taller
-          enddo ! cohort loop
-          currentPatch => currentPatch%older
-       end do !patch loop
        do while(associated(currentPatch))
           currentCohort => currentPatch%shortest
           do while(associated(currentCohort)) 
              ft = currentCohort%pft
              currentCohort%hard_level = currentSite%hard_level2(ft)   
-             write(fates_log(),*) 'hard_level',currentCohort%hard_level
              currentCohort => currentCohort%taller
           enddo ! cohort loop
           currentPatch => currentPatch%older
        end do !patch loop
+       !write(fates_log(),*) hlm_current_year,hlm_day_of_year,'hard_level2 second',currentSite%hard_level2(ft)
+
     end if
     !---------------
 

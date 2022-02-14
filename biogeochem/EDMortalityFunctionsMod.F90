@@ -86,6 +86,7 @@ contains
     real(r8) :: hard_carb          ! reduced carb mortality if hardened 
     real(r8) :: hard_hydr          ! reduced hydro mortality if hardened 
     real(r8) :: max_h !marius
+    real(r8), parameter :: min_h = -2.0_r8 !marius
     real(r8) :: Tmin  !marius
     real(r8), parameter :: frost_mort_buffer = 5.0_r8  ! 5deg buffer for freezing mortality
     logical, parameter :: test_zero_mortality = .false. ! Developer test which
@@ -144,8 +145,9 @@ if (hlm_use_ed_prescribed_phys .eq. ifalse) then
      flc = 1.0_r8-min_fmc
      if(flc >= hf_flc_threshold .and. hf_flc_threshold < 1.0_r8 )then 
        !--------------------marius
-       if (hlm_use_hydrohard .eq. itrue .and. currentSite%hard_level2(cohort_in%pft) < -3._r8) then
-         hard_hydr=EDPftvarcon_inst%mort_scalar_hydrfailure(cohort_in%pft)*(currentSite%hard_level2(cohort_in%pft)*0.5_r8+0.5_r8)
+       if (hlm_use_hydrohard .eq. itrue .and. currentSite%hard_level2(cohort_in%pft) < -3._r8) then  
+         max_h=min(max(EDPftvarcon_inst%freezetol(cohort_in%pft),max(currentSite%hardtemp,-55._r8)-15._r8),min_h)
+         hard_hydr=EDPftvarcon_inst%mort_scalar_hydrfailure(cohort_in%pft)*( ((currentSite%hard_level2(cohort_in%pft)-max_h)/(min_h-max_h) )  *0.5_r8+0.5_r8)
        else 
          hard_hydr=EDPftvarcon_inst%mort_scalar_hydrfailure(cohort_in%pft)
        end if
@@ -208,13 +210,16 @@ if (hlm_use_ed_prescribed_phys .eq. ifalse) then
 
     if (hlm_use_frosthard .eq. itrue) then !marius implementation of frost 
        Tmin=bc_in%tmin24_si-273.15_r8
-       temp_dep_fraction  = max(0.0_r8, min(1.0_r8,(-Tmin + &
-                            max(EDPftvarcon_inst%freezetol(cohort_in%pft),currentSite%hard_level2(cohort_in%pft)))/frost_mort_buffer) )
-       !write(fates_log(),*) hlm_current_year,'-',hlm_current_month,'-',hlm_current_day,'hard:',currentSite%hard_level2(cohort_in%pft),'temp:',Tmin
+       temp_dep_fraction  = max(0.0_r8, min(1.0_r8,(-Tmin + currentSite%hard_level2(cohort_in%pft))/frost_mort_buffer) )
        if (nint(hlm_model_day)<185) then
           temp_dep_fraction=0._r8
        endif
-       frmort    = EDPftvarcon_inst%mort_scalar_coldstress(cohort_in%pft)*temp_dep_fraction*5._r8
+       max_h=min(max(EDPftvarcon_inst%freezetol(cohort_in%pft),max(currentSite%hardtemp,-55._r8)-15._r8),min_h)
+       if (currentSite%hard_level2(cohort_in%pft)-max_h>1) then
+          frmort    = EDPftvarcon_inst%mort_scalar_coldstress(cohort_in%pft)*temp_dep_fraction*5._r8
+       else
+          frmort    = EDPftvarcon_inst%mort_scalar_coldstress(cohort_in%pft)*temp_dep_fraction
+       endif
     else
        temp_in_C = bc_in%t_veg24_pa(ifp) - tfrz
        temp_dep_fraction  = max(0.0_r8, min(1.0_r8, 1.0_r8 - (temp_in_C - &
@@ -356,9 +361,12 @@ if (hlm_use_ed_prescribed_phys .eq. ifalse) then
     integer  :: ipft                    ! pft index
 
     Tmean=bc_in%temp24_si-273.15_r8
+    if (Tmean<-200.0_r8) then
+       Tmean=0.0_r8
+    endif
     Tmin=bc_in%tmin24_si-273.15_r8
 
-    max_h=min(max(currentSite%hardtemp,-55._r8)-15._r8,min_h)
+    max_h=min(max(EDPftvarcon_inst%freezetol(cohort_in%pft),max(currentSite%hardtemp,-55._r8)-15._r8),min_h)
 
     !Calculation of the target hardiness
     if (Tmean <= max_h/1.5_r8) then !
