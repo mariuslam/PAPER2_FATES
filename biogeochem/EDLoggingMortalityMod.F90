@@ -253,7 +253,7 @@ contains
             ! 2=use carbon from hlm
             ! not implemented yet
             write(fates_log(),*) 'HLM harvest carbon data not implemented yet. Exiting.'
-            call endrun(msg=errMsg(sourcefile, __LINE__))
+            !call endrun(msg=errMsg(sourcefile, __LINE__))
          endif
 
          ! transfer of area to secondary land is based on overall area affected, not just logged crown area
