@@ -1792,13 +1792,13 @@ end subroutine flush_hvars
                hio_ncohorts_si         => this%hvars(ih_ncohorts_si)%r81d, &
                hio_trimming_si         => this%hvars(ih_trimming_si)%r81d, &
                hio_area_plant_si       => this%hvars(ih_area_plant_si)%r81d, &
-               hio_area_trees_si  => this%hvars(ih_area_trees_si)%r81d, & 
+               hio_area_trees_si       => this%hvars(ih_area_trees_si)%r81d, & 
                hio_canopy_spread_si    => this%hvars(ih_canopy_spread_si)%r81d, &
                hio_biomass_si_pft      => this%hvars(ih_biomass_si_pft)%r82d, &
                hio_leafbiomass_si_pft  => this%hvars(ih_leafbiomass_si_pft)%r82d, &
                hio_storebiomass_si_pft => this%hvars(ih_storebiomass_si_pft)%r82d, &
-               hio_hard_level2_si_pft => this%hvars(ih_hard_level2_si_pft)%r82d, &
-               hio_frmort_si_pft      => this%hvars(ih_frmort_si_pft)%r82d, &
+               hio_hard_level2_si_pft  => this%hvars(ih_hard_level2_si_pft)%r82d, &
+               hio_frmort_si_pft       => this%hvars(ih_frmort_si_pft)%r82d, &
                hio_nindivs_si_pft      => this%hvars(ih_nindivs_si_pft)%r82d, &
                hio_recruitment_si_pft  => this%hvars(ih_recruitment_si_pft)%r82d, &
                hio_mortality_si_pft    => this%hvars(ih_mortality_si_pft)%r82d, &

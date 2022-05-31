@@ -1666,9 +1666,9 @@ contains
            rio_dleafoffdate_si         => this%rvars(ir_dleafoffdate_si)%int1d, &
            rio_acc_ni_si               => this%rvars(ir_acc_ni_si)%r81d, &
            rio_gdd_si                  => this%rvars(ir_gdd_si)%r81d, &
-           rio_gdd5_si                  => this%rvars(ir_gdd5_si)%r81d, & !marius
-           rio_hard_level_co            => this%rvars(ir_hard_level_co)%r81d, & !marius
-           rio_hard_level_prev_co            => this%rvars(ir_hard_level_prev_co)%r81d, & !marius
+           rio_gdd5_si                 => this%rvars(ir_gdd5_si)%r81d, & !marius
+           rio_hard_level_co           => this%rvars(ir_hard_level_co)%r81d, & !marius
+           rio_hard_level_prev_co      => this%rvars(ir_hard_level_prev_co)%r81d, & !marius
            rio_snow_depth_si           => this%rvars(ir_snow_depth_si)%r81d, &
            rio_trunk_product_si        => this%rvars(ir_trunk_product_si)%r81d, &
            rio_ncohort_pa              => this%rvars(ir_ncohort_pa)%int1d, &
@@ -1932,6 +1932,11 @@ contains
                 rio_smort_co(io_idx_co)        = ccohort%smort
                 rio_asmort_co(io_idx_co)       = ccohort%asmort
                 rio_frmort_co(io_idx_co)       = ccohort%frmort
+
+                if (hlm_use_hydrohard .eq. itrue .or. hlm_use_frosthard .eq. itrue) then
+                   rio_hard_level_co(io_idx_co)      = ccohort%hard_level !marius
+                   rio_hard_level_prev_co(io_idx_co) = ccohort%hard_level_prev
+                end if
 
                 ! Nutrient uptake/efflux
                 rio_daily_no3_uptake_co(io_idx_co) = ccohort%daily_no3_uptake
@@ -2484,9 +2489,9 @@ contains
           rio_dleafoffdate_si         => this%rvars(ir_dleafoffdate_si)%int1d, &
           rio_acc_ni_si               => this%rvars(ir_acc_ni_si)%r81d, &
           rio_gdd_si                  => this%rvars(ir_gdd_si)%r81d, &
-          rio_gdd5_si                  => this%rvars(ir_gdd5_si)%r81d, & !marius
-          rio_hard_level_co            => this%rvars(ir_hard_level_co)%r81d, & !marius
-          rio_hard_level_prev_co            => this%rvars(ir_hard_level_prev_co)%r81d, & !marius
+          rio_gdd5_si                 => this%rvars(ir_gdd5_si)%r81d, & !marius
+          rio_hard_level_co           => this%rvars(ir_hard_level_co)%r81d, & !marius
+          rio_hard_level_prev_co      => this%rvars(ir_hard_level_prev_co)%r81d, & !marius
           rio_snow_depth_si           => this%rvars(ir_snow_depth_si)%r81d, &
           rio_trunk_product_si        => this%rvars(ir_trunk_product_si)%r81d, &
           rio_ncohort_pa              => this%rvars(ir_ncohort_pa)%int1d, &
